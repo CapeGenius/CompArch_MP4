@@ -1,6 +1,6 @@
 `include "memory_array.sv"
 module instruction_mem #(
-    parameter INIT_FILE = ""
+    parameter IMEM_INIT_FILE_PREFIX = ""
 )(
     input logic         clk,
     input logic         [9:0] imem_address,
