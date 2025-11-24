@@ -42,9 +42,15 @@ module datapath (
     logic[4:0] rs1, rs2, rd1; // address of RD1
     logic [31:0] write_data_input, read_data_1, read_data_2;
     logic [31:0] stored_read_data_1, stored_read_data_2;
+    logic [24:0] immediate; 
+
+    //assign rs1, rs2, rd, and extend
+    assign rs1 = instruction_out[19:15];
+    assign rs2 = instruction_out[24:20];
+    assign rd = instruction_out[11:7];
+    assign immediate = instruction_out[31:7];
 
     //declaring all modules
-
     //program count register
     flop_enable #(.WIDTH (32)) 
     program_counter (
