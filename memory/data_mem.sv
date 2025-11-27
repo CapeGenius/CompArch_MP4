@@ -6,10 +6,10 @@ module data_mem #(
 )(
     input logic     clk,
     input logic     [2:0] funct3, 
-    input logic     [2:0] dmen_wren,
+    input logic     dmem_wren,
     input logic     [31:0] dmem_address, 
     input logic     [31:0] dmem_data_in,
-    output logic    [31:0] dmem_data_out 
+    output logic    [31:0] dmem_data_out,
     output logic    reset, 
     output logic    led,                    // Active-high PWM output for user LED
     output logic    red,                    // Active-high PWM output for red LED

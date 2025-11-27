@@ -35,7 +35,7 @@ module instruction_mem #(
     );
 
     memory_array #(
-        .INIT_FILE      ((IMEM_INIT_FILE_PREFIX != "") ? { IMEM_INIT_FILE_PREFIX, "1.txt" } : "")
+        .INIT_FILE      ((IMEM_INIT_FILE_PREFIX != "") ? { IMEM_INIT_FILE_PREFIX, "2.txt" } : "")
     ) imem2 (
         .clk                (clk),
         .write_enable       (1'b0),
@@ -45,7 +45,7 @@ module instruction_mem #(
     );
 
     memory_array #(
-        .INIT_FILE      ((IMEM_INIT_FILE_PREFIX != "") ? { IMEM_INIT_FILE_PREFIX, "1.txt" } : "")
+        .INIT_FILE      ((IMEM_INIT_FILE_PREFIX != "") ? { IMEM_INIT_FILE_PREFIX, "3.txt" } : "")
     ) imem3 (
         .clk                (clk),
         .write_enable       (1'b0),
