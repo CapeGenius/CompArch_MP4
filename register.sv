@@ -3,10 +3,10 @@ module register #(
 )(
     input logic clk,
     input logic write_enable_flag,
-    input logic[4:0] a1,
-    input logic [4:0] a2, 
-    input logic [4:0] a3,
-    input logic [31:0] write_data_input,
+    input logic[4:0] a1, // address of RS1
+    input logic [4:0] a2, // address of RS2
+    input logic [4:0] a3, // address of RD1
+    input logic [31:0] write_data_input, // incoming data into RD1
     output logic [31:0] read_data_1,
     output logic [31:0] read_data_2
 );

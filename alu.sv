@@ -1,9 +1,9 @@
 module alu (
-    input logic             clk, 
     input logic [31:0]      SrcA,
     input logic [31:0]      SrcB,
     input logic [2:0]       ALU_control,
-    output logic [31:0]     ALU_result
+    output logic [31:0]     ALU_result,
+    output logic            Zero,
 );
     localparam [2:0] ADD =              3`b000;
     localparam [2:0] SUBTRACT =         3`b001;
