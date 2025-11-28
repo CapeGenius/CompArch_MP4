@@ -22,4 +22,11 @@ module alu (
         endcase
     end
 
+    always_comb begin 
+        case (ALU_result)
+            0: Zero = 1; 
+            default: Zero = 0;
+        endcase
+    end
+
 endmodule
