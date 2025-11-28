@@ -1,4 +1,4 @@
-`include "memory_array.sv"
+`include "memory/memory_array.sv"
 
 module data_mem #(
     parameter DMEM_INIT_FILE_PREFIX = "", 
@@ -98,7 +98,7 @@ module data_mem #(
     ) dmem0 (
         .clk            (clk), 
         .write_enable   (dmem_wren0), 
-        .address        (dmem_address[11:2]), 
+        .address        (dmem_address), 
         .data_in        (dmem_data_in0), 
         .data_out       (dmem_data_out0)
     );
@@ -108,7 +108,7 @@ module data_mem #(
     ) dmem1 (
         .clk            (clk), 
         .write_enable   (dmem_wren1), 
-        .address        (dmem_address[11:2]), 
+        .address        (dmem_address), 
         .data_in        (dmem_data_in1), 
         .data_out       (dmem_data_out1)
     );
@@ -118,7 +118,7 @@ module data_mem #(
     ) dmem2 (
         .clk            (clk), 
         .write_enable   (dmem_wren2), 
-        .address        (dmem_address[11:2]), 
+        .address        (dmem_address), 
         .data_in        (dmem_data_in2), 
         .data_out       (dmem_data_out2)
     );
@@ -128,7 +128,7 @@ module data_mem #(
     ) dmem3 (
         .clk            (clk), 
         .write_enable   (dmem_wren3), 
-        .address        (dmem_address[11:2]), 
+        .address        (dmem_address), 
         .data_in        (dmem_data_in3), 
         .data_out       (dmem_data_out3)
     );
