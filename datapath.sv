@@ -19,7 +19,10 @@ module datapath (
                 output logic Zero, 
                 output logic led, red, green, blue);
     // create reset
-    logic gen_reset = 0; 
+    logic gen_reset;
+    logic dmem_reset;
+
+    assign gen_reset = 0; 
     
     // create PC logic 
     logic PC_reset;
@@ -33,6 +36,7 @@ module datapath (
     // declare data from data memory
     logic [31:0] dmem_out;
     logic [31:0] dmem_data;
+    logic [31:0] mem_address;
 
     // declare logic for register
     logic[4:0] rs1, rs2, rd1; // address of RD1
@@ -53,7 +57,7 @@ module datapath (
     assign immediate = instruction_out[31:7];
     assign op_code = instruction_out[6:0];
     assign funct3 = instruction_out[14:12];
-    assign funct7 = instruction_out[31:25]
+    assign funct7 = instruction_out[31:25];
 
     //declaring all modules
     //program count register
@@ -72,7 +76,7 @@ module datapath (
         .d0         (PC_current),
         .d1         (result),
         .s          (adr_src),
-        .y          (mem_adress)
+        .y          (mem_address)
     );
 
     // data memory module   
@@ -83,10 +87,10 @@ module datapath (
         .clk            (clk),
         .dmem_wren      (mem_write),
         .funct3         (funct3),
-        .dmem_address   (mem_adress),
+        .dmem_address   (mem_address),
         .dmem_data_in   (stored_read_data_2),
         .dmem_data_out  (dmem_out),
-        .reset          (gen_reset),
+        .reset          (dmem_reset),
         .led            (led),
         .red            (red),
         .green          (green),
@@ -99,7 +103,7 @@ module datapath (
     )
     instruction_memory (
         .clk            (clk),
-        .imem_address   (mem_adress),
+        .imem_address   (mem_address),
         .imem_data_out  (instruction_in)
     );
 
@@ -140,7 +144,7 @@ module datapath (
         .a3                 (rd1),
         .write_data_input   (result),
         .read_data_1        (read_data_1),
-        .read_data_2        (read_data_2).
+        .read_data_2        (read_data_2)
     );
 
     extend extend_immediate(
@@ -188,11 +192,11 @@ module datapath (
     );
 
     flop alu_flop (
-        .clk            (ALU_result),
+        .clk            (clk),
         .reset          (gen_reset),
         .data           (ALU_result),
-        .stored_value   (ALU_out),
-    )
+        .stored_value   (ALU_out)
+    );
 
     mux3 mux_alu_out (
         .d0     (ALU_out),
@@ -200,7 +204,7 @@ module datapath (
         .d2     (ALU_result),
         .s      (result_src),
         .y      (result)
-    )
+    );
 
 
 

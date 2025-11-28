@@ -1,4 +1,4 @@
-module flop #(parameter WIDTH = 32)
+module flop_enable #(parameter WIDTH = 32)
     (
         input logic clk,
         input logic reset,
