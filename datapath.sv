@@ -17,13 +17,10 @@ module datapath (
                 output logic [2:0] funct3,
                 output logic [6:0] funct7, 
                 output logic Zero, 
-                input logic RGB_R, RGB_B, RGB_R);
+                output logic led, red, green, blue);
     // create reset
     logic gen_reset = 0; 
     
-    //create LED
-    logic [31:0] led;
-
     // create PC logic 
     logic PC_reset;
     logic [31:0] PC_next;
@@ -91,9 +88,9 @@ module datapath (
         .dmem_data_out  (dmem_out),
         .reset          (gen_reset),
         .led            (led),
-        .red            (RGB_R),
-        .green          (RGB_G),
-        .blue           (RGB_B)
+        .red            (red),
+        .green          (green),
+        .blue           (blue)
     );
 
     // instruction memory module
