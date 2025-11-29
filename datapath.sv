@@ -10,6 +10,7 @@
 
 module datapath (
                 input logic clk,
+                input logic reset,
                 input logic adr_src, mem_write, IR_write, reg_write, PC_write,
                 input logic [1:0] result_src, alu_src_a, alu_src_b,
                 input logic [2:0] imm_src,
@@ -23,7 +24,7 @@ module datapath (
     logic gen_reset;
     logic dmem_reset;
 
-    assign gen_reset = 0; 
+    assign gen_reset = reset; 
     
     // create PC logic 
     logic PC_reset;
@@ -62,7 +63,7 @@ module datapath (
 
     //declaring all modules
     //program count register
-    flop_enable #(.WIDTH (32)) 
+    flop_enable #(.WIDTH(32), .RESET_VALUE(32'h1000)) 
     program_counter (
         .clk                (clk),
         .reset              (gen_reset),

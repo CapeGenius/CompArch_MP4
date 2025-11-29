@@ -1,4 +1,4 @@
-module flop_enable #(parameter WIDTH = 32)
+module flop_enable #(parameter WIDTH = 32, parameter RESET_VALUE = 0)
     (
         input logic clk,
         input logic reset,
@@ -9,7 +9,7 @@ module flop_enable #(parameter WIDTH = 32)
 
     always_ff @(posedge clk) begin
         if (reset) begin
-            stored_value <= 0;
+            stored_value <= RESET_VALUE;
         end
         else if (enable) begin
             stored_value <= data;

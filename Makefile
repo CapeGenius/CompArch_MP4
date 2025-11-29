@@ -9,5 +9,19 @@ build:
 prog: #for sram
 	dfu-util --device 1d50:6146 --alt 0 -D $(filename).bin -R
 
+sim: mp4_test
+	vvp mp4_test
+
+mp4_test: mp4_tb.sv top.sv control_unit.sv datapath.sv
+	iverilog -g2012 -o mp4_test mp4_tb.sv
+
+test: mp4_test
+	./test.sh
+
+wave: mp4.vcd
+	gtkwave mp4.vcd &
+
 clean:
-	rm -rf $(filename).blif $(filename).asc $(filename).json $(filename).bin
+	rm -rf $(filename).blif $(filename).asc $(filename).json $(filename).bin mp4_test mp4.vcd
+
+.PHONY: build prog sim test wave clean

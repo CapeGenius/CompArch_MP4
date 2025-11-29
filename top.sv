@@ -57,6 +57,7 @@ module top (
     // Datapath instance  
     datapath dp (
         .clk(clk),
+        .reset(reset),
         .adr_src(AdrSrc),
         .mem_write(MemWrite),
         .IR_write(IRWrite),
