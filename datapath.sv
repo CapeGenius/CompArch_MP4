@@ -11,7 +11,8 @@
 module datapath (
                 input logic clk,
                 input logic adr_src, mem_write, IR_write, reg_write, PC_write,
-                input logic [1:0] result_src, alu_src_a, alu_src_b, imm_src,
+                input logic [1:0] result_src, alu_src_a, alu_src_b,
+                input logic [2:0] imm_src,
                 input logic [2:0] alu_control,
                 output logic [6:0] op_code,
                 output logic [2:0] funct3,
@@ -39,7 +40,7 @@ module datapath (
     logic [31:0] mem_address;
 
     // declare logic for register
-    logic[4:0] rs1, rs2, rd1; // address of RD1
+    logic[4:0] rs1, rs2, rd; // address of RD
     logic [31:0] write_data_input, read_data_1, read_data_2;
     logic [31:0] stored_read_data_1, stored_read_data_2;
     logic [31:7] immediate; 
@@ -141,7 +142,7 @@ module datapath (
         .write_enable_flag  (reg_write), 
         .a1                 (rs1),
         .a2                 (rs2),
-        .a3                 (rd1),
+        .a3                 (rd),
         .write_data_input   (result),
         .read_data_1        (read_data_1),
         .read_data_2        (read_data_2)
@@ -198,16 +199,11 @@ module datapath (
         .stored_value   (ALU_out)
     );
 
-    mux3 mux_alu_out (
+    mux3 mux_result (
         .d0     (ALU_out),
         .d1     (dmem_data),
         .d2     (ALU_result),
         .s      (result_src),
         .y      (result)
     );
-
-
-
-
-
 endmodule

@@ -5,11 +5,11 @@ module alu (
     output logic [31:0]     ALU_result,
     output logic            Zero
 );
-    localparam [2:0] ADD =              3`b000;
-    localparam [2:0] SUBTRACT =         3`b001;
-    localparam [2:0] SET_LESS_THAN =    3`b101;
-    localparam [2:0] OR =               3`b011;
-    localparam [2:0] AND =              3`b010;
+    localparam [2:0] ADD =              3'b000;
+    localparam [2:0] SUBTRACT =         3'b001;
+    localparam [2:0] SET_LESS_THAN =    3'b101;
+    localparam [2:0] OR =               3'b011;
+    localparam [2:0] AND =              3'b010;
 
     always_comb begin 
         case (ALU_control)
@@ -18,7 +18,7 @@ module alu (
             SET_LESS_THAN: ALU_result = (SrcA < SrcB) ? 1 : 0;
             OR: ALU_result = (SrcA | SrcB);
             AND: ALU_result = (SrcA & SrcB);
-            default: ALU_result = 32`b0;
+            default: ALU_result = 32'b0;
         endcase
     end
 
