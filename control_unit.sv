@@ -1,6 +1,8 @@
 `include "main_decoder.sv"
 `include "alu_decoder.sv"
 
+// things to do --> create a nested case statement that determines next states based on op code and current state
+
 module controller (input logic clk,
                    input logic reset,
                    input logic [6:0] op,
@@ -22,6 +24,13 @@ module controller (input logic clk,
     logic [1:0] ALUOp;
     logic Branch;
     logic PCUpdate;
+
+    localparam OP_LOAD   = 7'b0000011;
+    localparam OP_STORE  = 7'b0100011;
+    localparam OP_R_TYPE = 7'b0110011;
+    localparam OP_I_ALU  = 7'b0010011;
+    localparam OP_JAL    = 7'b1101111;
+    localparam OP_BRANCH = 7'b1100011;
 
     typedef enum logic [3:0] {
         FETCH    = 4'b0000,
@@ -50,10 +59,22 @@ module controller (input logic clk,
     always_comb begin
         case (current_state)
             FETCH:  next_state = DECODE;
-            DECODE:  next_state = MEMADR;
-            MEMADR: next_state = MEMREAD;
+            DECODE:
+                case(op)
+                    OP_LOAD, OP_STORE: next_state = MEMADR;
+                    OP_R_TYPE: next_state = EXECUTER;
+                    OP_I_ALU: next_state = EXECUTEI;
+                    OP_JAL: next_state = JAL;
+                    OP_BRANCH: next_state = BEQ; 
+                endcase  
+            MEMADR: 
+                case(op)
+                    OP_LOAD: next_state = MEMREAD;
+                    OP_STORE: next_state = MEMWRITE; 
+                endcase
+            EXECUTER, EXECUTEI, JAL: next_state = ALUWB;
             MEMREAD: next_state = MEMWB;
-            MEMWB: next_state = FETCH;
+            MEMWB, MEM_WRITE, ALUWB, BEQ: next_state = FETCH;
         endcase
     end
 
@@ -84,7 +105,9 @@ module controller (input logic clk,
             end
 
             DECODE: begin 
-                // TODO for other instructions
+                ALUSrcA = 2'b10;
+                ALUSrcB = 2'b01;
+                ALUOp   = 2'b0;
             end
             
             MEMADR: begin
