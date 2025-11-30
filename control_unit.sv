@@ -127,6 +127,45 @@ module controller (input logic clk,
                 RegWrite = 1'b1;    // Write to register
                 ResultSrc = 2'b01;  // Memory data
             end
+
+            MEM_WRITE: begin
+                ResultSrc = 2'b00;  // Memory data
+                AdrSrc = 1'b1;
+                MemWrite = 1'b1; 
+            end
+
+            ALUWB: begin
+                ResultSrc = 2'b00;
+                RegWrite = 1'b1;
+            end
+
+            EXECUTER: begin
+                ALUSrcA = 2'b10;
+                ALUSrcB = 2'b00;
+                ALUOp   = 2'b10;
+            end
+
+            EXECUTEI: begin
+                ALUSrcA = 2'b10;
+                ALUSrcB = 2'b01;
+                ALUOp   = 2'b10;
+            end
+
+            JAL: begin
+                ALUSrcA = 2'b01;
+                ALUSrcB = 2'b10;
+                ALUOp   = 2'b00;
+                ResultSrc = 2'b00;
+                PCUpdate = 1'b1; 
+            end
+            
+            BEQ: begin
+                ALUSrcA = 2'b10;
+                ALUSrcB = 2'b00;
+                ALUOp = 2'b01;
+                ResultSrc = 2'b00;
+                Branch = 1'b0;
+            end
             
             default: begin
                 // All defaults already set above
