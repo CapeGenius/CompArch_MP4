@@ -14,7 +14,7 @@ module datapath (
                 input logic adr_src, mem_write, IR_write, reg_write, PC_write,
                 input logic [1:0] result_src, alu_src_a, alu_src_b,
                 input logic [2:0] imm_src,
-                input logic [2:0] alu_control,
+                input logic [3:0] alu_control,
                 output logic [6:0] op_code,
                 output logic [2:0] funct3,
                 output logic [6:0] funct7, 

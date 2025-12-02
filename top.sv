@@ -19,7 +19,7 @@ module top (
     logic RegWrite;
     logic Jump;
     logic [2:0] ImmSrc;
-    logic [2:0] ALUControl;
+    logic [3:0] ALUControl;
     logic IRWrite;
     logic PCWrite;
     
