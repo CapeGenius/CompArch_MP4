@@ -1,8 +1,6 @@
 `include "main_decoder.sv"
 `include "alu_decoder.sv"
 
-// things to do --> create a nested case statement that determines next states based on op code and current state
-
 module controller (input logic clk,
                    input logic reset,
                    input logic [6:0] op,
@@ -17,7 +15,7 @@ module controller (input logic clk,
                    output logic RegWrite,
                    output logic Jump,
                    output logic [2:0] ImmSrc,
-                   output logic [2:0] ALUControl,
+                   output logic [3:0] ALUControl,
                    output logic IRWrite,
                    output logic PCWrite);
 
@@ -74,7 +72,7 @@ module controller (input logic clk,
                 endcase
             EXECUTER, EXECUTEI, JAL: next_state = ALUWB;
             MEMREAD: next_state = MEMWB;
-            MEMWB, MEM_WRITE, ALUWB, BEQ: next_state = FETCH;
+            MEMWB, MEMWRITE, ALUWB, BEQ: next_state = FETCH;
         endcase
     end
 
@@ -95,13 +93,13 @@ module controller (input logic clk,
 
         case (current_state)
             FETCH: begin
-                AdrSrc = 1'b0;      // Address from PC
-                IRWrite = 1'b1;     // Load instruction into IR
-                ALUSrcA = 2'b00;    // PC
-                ALUSrcB = 2'b10;    // 4
-                ALUOp = 2'b00;      // ADD
-                ResultSrc = 2'b10;  // ALUResult
-                PCUpdate = 1'b1;    // Update PC with PC+4
+                AdrSrc = 1'b0;
+                IRWrite = 1'b1; 
+                ALUSrcA = 2'b00;  
+                ALUSrcB = 2'b10; 
+                ALUOp = 2'b00;  
+                ResultSrc = 2'b10; 
+                PCUpdate = 1'b1; 
             end
 
             DECODE: begin 
@@ -111,25 +109,25 @@ module controller (input logic clk,
             end
             
             MEMADR: begin
-                ALUSrcA = 2'b10;    // Register A
-                ALUSrcB = 2'b01;    // Immediate
-                ALUOp = 2'b00;      // ADD for memory address
-                if (op == 7'b0000011) ImmSrc = 3'b000;  // I-type for LW
-                else ImmSrc = 3'b001;                   // S-type for SW
+                ALUSrcA = 2'b10;  
+                ALUSrcB = 2'b01; 
+                ALUOp = 2'b00;  
+                if (op == 7'b0000011) ImmSrc = 3'b000; 
+                else ImmSrc = 3'b001; 
             end
             
             MEMREAD: begin
-                AdrSrc = 1'b1;      // Address from ALU
-                ResultSrc = 2'b00;  // ALU result (for address)
+                AdrSrc = 1'b1;   
+                ResultSrc = 2'b00;
             end
             
             MEMWB: begin
-                RegWrite = 1'b1;    // Write to register
-                ResultSrc = 2'b01;  // Memory data
+                RegWrite = 1'b1;   
+                ResultSrc = 2'b01; 
             end
 
             MEM_WRITE: begin
-                ResultSrc = 2'b00;  // Memory data
+                ResultSrc = 2'b00;
                 AdrSrc = 1'b1;
                 MemWrite = 1'b1; 
             end
@@ -149,6 +147,7 @@ module controller (input logic clk,
                 ALUSrcA = 2'b10;
                 ALUSrcB = 2'b01;
                 ALUOp   = 2'b10;
+                ImmSrc = 3'b000; 
             end
 
             JAL: begin
@@ -156,7 +155,8 @@ module controller (input logic clk,
                 ALUSrcB = 2'b10;
                 ALUOp   = 2'b00;
                 ResultSrc = 2'b00;
-                PCUpdate = 1'b1; 
+                PCUpdate = 1'b1;
+                ImmSrc = 3'b100; 
             end
             
             BEQ: begin
@@ -164,7 +164,8 @@ module controller (input logic clk,
                 ALUSrcB = 2'b00;
                 ALUOp = 2'b01;
                 ResultSrc = 2'b00;
-                Branch = 1'b0;
+                Branch = 1'b1;
+                ImmSrc = 3'b010;
             end
             
             default: begin
