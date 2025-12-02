@@ -8,8 +8,8 @@ module aludec (input logic opb5,
     
     always_comb begin
         case (ALUOp)
-            2'b00: ALUControl = 4'b0000; // add (for loads/stores/AUIPC)
-            2'b01: ALUControl = 4'b0001; // sub (for branches)
+            2'b00: ALUControl = 4'b0000; // add
+            2'b01: ALUControl = 4'b0001; // sub
             2'b10: begin
                 // R-type and I-type ALU operations: use funct3 and funct7
                 case (funct3)
