@@ -1,4 +1,3 @@
-`include "main_decoder.sv"
 `include "alu_decoder.sv"
 
 module controller (input logic clk,
@@ -29,6 +28,8 @@ module controller (input logic clk,
     localparam OP_I_ALU  = 7'b0010011;
     localparam OP_JAL    = 7'b1101111;
     localparam OP_BRANCH = 7'b1100011;
+    localparam OP_U_TYPE = 7'b0110111;
+    localparam OP_U_TYPE_2 = 7'b0010111;
 
     typedef enum logic [3:0] {
         FETCH    = 4'b0000,
@@ -61,7 +62,7 @@ module controller (input logic clk,
                 case(op)
                     OP_LOAD, OP_STORE: next_state = MEMADR;
                     OP_R_TYPE: next_state = EXECUTER;
-                    OP_I_ALU: next_state = EXECUTEI;
+                    OP_U_TYPE, OP_I_ALU, OP_U_TYPE_2: next_state = EXECUTEI;
                     OP_JAL: next_state = JAL;
                     OP_BRANCH: next_state = BEQ; 
                 endcase  
@@ -126,7 +127,7 @@ module controller (input logic clk,
                 ResultSrc = 2'b01; 
             end
 
-            MEM_WRITE: begin
+            MEMWRITE: begin
                 ResultSrc = 2'b00;
                 AdrSrc = 1'b1;
                 MemWrite = 1'b1; 
