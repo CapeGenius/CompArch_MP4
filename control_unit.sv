@@ -28,6 +28,7 @@ module controller (input logic clk,
     localparam OP_STORE  = 7'b0100011;
     localparam OP_R_TYPE = 7'b0110011;
     localparam OP_I_ALU  = 7'b0010011;
+    localparam OP_I_JALR = 7'b1100111;
     localparam OP_JAL    = 7'b1101111;
     localparam OP_BRANCH = 7'b1100011;
     localparam OP_U_TYPE = 7'b0110111;
@@ -45,7 +46,8 @@ module controller (input logic clk,
         EXECUTEI = 4'b0111,
         ALUWB    = 4'b1000,
         BEQ      = 4'b1001,
-        JAL      = 4'b1010
+        JAL      = 4'b1010,
+        BUFFER_MEM_WRITE = 4'b1111
     } statetype;
 
     statetype current_state, next_state;
@@ -65,7 +67,7 @@ module controller (input logic clk,
                 case(op)
                     OP_LOAD, OP_STORE: next_state = MEMADR;
                     OP_R_TYPE: next_state = EXECUTER;
-                    OP_U_TYPE, OP_I_ALU, OP_U_TYPE_2: next_state = EXECUTEI;
+                    OP_U_TYPE, OP_I_ALU, OP_I_JALR, OP_U_TYPE_2: next_state = EXECUTEI;
                     OP_JAL: next_state = JAL;
                     OP_BRANCH: next_state = BEQ; 
                     default: next_state = FETCH;  // <---
@@ -78,7 +80,8 @@ module controller (input logic clk,
                 endcase
             EXECUTER, EXECUTEI, JAL: next_state = ALUWB;
             MEMREAD: next_state = MEMWB;
-            MEMWB, MEMWRITE, ALUWB, BEQ: next_state = FETCH;
+            MEMWRITE: next_state = BUFFER_MEM_WRITE;
+            MEMWB, BUFFER_MEM_WRITE, ALUWB, BEQ: next_state = FETCH;
         endcase
     end
 
@@ -176,7 +179,7 @@ module controller (input logic clk,
             end
 
             JAL: begin
-                ALUSrcA = 2'b00;
+                ALUSrcA = 2'b01;
                 ALUSrcB = 2'b01;
                 ALUOp   = 2'b00;
                 ResultSrc = 2'b10;
@@ -209,6 +212,7 @@ module controller (input logic clk,
             MEMREAD:    cycle_state = "MEMREAD";
             MEMWB:      cycle_state = "MEMWB";
             MEMWRITE:   cycle_state = "MEMWRITE";
+            BUFFER_MEM_WRITE: cycle_state = "BUFFER_MEM_WRITE";
             EXECUTER:   cycle_state = "EXECUTER";
             EXECUTEI:   cycle_state = "EXECUTEI";
             ALUWB:      cycle_state = "ALUWB";
