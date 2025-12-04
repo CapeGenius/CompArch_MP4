@@ -81,12 +81,13 @@ module controller (input logic clk,
     always_comb begin
         // Default values
         RegWrite = 1'b0; 
-        ImmSrc = 3'b000; 
-        ALUSrcA = 2'b00; ALUSrcB = 2'b00;
+        ImmSrc = 3'bXXX; 
+        ALUSrcA = 2'bXX; 
+        ALUSrcB = 2'b00;
         MemWrite = 1'b0;
-        ResultSrc = 2'b00; 
+        ResultSrc = 2'bXX; 
         Branch = 1'b0; 
-        ALUOp = 2'b00; 
+        ALUOp = 2'bXX; 
         Jump = 1'b0;
         AdrSrc = 1'b0; 
         IRWrite = 1'b0;
@@ -107,6 +108,16 @@ module controller (input logic clk,
                 ALUSrcA = 2'b10;
                 ALUSrcB = 2'b01;
                 ALUOp   = 2'b0;
+                    // Choose immediate type based on opcode
+                case(op)
+                    7'b0000011: ImmSrc = 3'b000; // I-type (lw)
+                    7'b0100011: ImmSrc = 3'b001; // S-type (sw)
+                    7'b1100011: ImmSrc = 3'b010; // B-type
+                    7'b0010111,
+                    7'b0110111: ImmSrc = 3'b011; // U-type (AUIPC/LUI)
+                    7'b1101111: ImmSrc = 3'b100; // JAL
+                    default:    ImmSrc = 3'b000; 
+                endcase
             end
             
             MEMADR: begin
@@ -128,9 +139,16 @@ module controller (input logic clk,
             end
 
             MEMWRITE: begin
-                ResultSrc = 2'b00;
                 AdrSrc = 1'b1;
-                MemWrite = 1'b1; 
+                MemWrite = 1'b1;
+
+                // ALU is not used; provide safe defaults
+                ALUSrcA = 2'b00;    // use PC or 0
+                ALUSrcB = 2'b00;    // use register B or 0
+                ALUOp   = 2'b00;    // ADD or dont-care
+
+                // S-Type immediate (but not necessary here)
+                ImmSrc = 3'b001;
             end
 
             ALUWB: begin
