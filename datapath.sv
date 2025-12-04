@@ -73,7 +73,8 @@ module datapath (
     end
 
     always @(posedge clk) begin 
-        $fdisplay(fd, "instr:%h", instruction_out,", pc:%h", PC_current, ", pc_write:%h", PC_write, ", result:%h", result); 
+        $fdisplay(fd, "clk:%0d, instr:%h, incoming_address: %h, selected_address: %h, IR_write: %h, opcode: %h, pc:%h, alu_out:%h, alu_result:%h, PC_next:%h, SrcA:%h, SrcB:%h, SrcA_crtl:%h, SrcB_crtl:%h alu_ctrl:%h, reg_write:%0d, pc_write:%0d,",
+                    clk, instruction_out, instruction_in, mem_address, IR_write, op_code, PC_current, ALU_out, ALU_result, result, SrcA, SrcB, alu_src_a, alu_src_b, alu_control, reg_write, PC_write); 
         $fflush(fd); 
     end
 
@@ -186,9 +187,9 @@ module datapath (
     );
 
     mux3 mux_src_a (
-        .d0     (PC_current),
-        .d1     (old_PC),
-        .d2     (stored_read_data_1),
+        .d0     (PC_current), 
+        .d1     (old_PC), 
+        .d2     (stored_read_data_1), 
         .s      (alu_src_a),
         .y      (SrcA)
     );
