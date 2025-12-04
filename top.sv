@@ -88,19 +88,22 @@ module top (
     end
 
     always @(posedge clk) begin
-        $fdisplay(file, "clk: %h, instruction: %h, state: %s", clk, dp.instruction_out, ctrl.cycle_state);
-        $fflush;
-        $fdisplay(file, "                PC & Instr  - pc:%h, PC_next:%h, instruction_in: %h, instruction_out: %h, opcode: %b",
+        $fdisplay(file, "instruction: %h, state: %s", dp.instruction_out, ctrl.cycle_state);
+        $fflush(file); 
+        $fdisplay(file, "                PC & Instr         - pc:%h, PC_next:%h, instruction_in: %h, instruction_out: %h, opcode: %b",
                     dp.PC_current, dp.result, dp.instruction_in, dp.instruction_out, dp.op_code);
+        $fflush(file); 
         $fdisplay(file, "                ALU Information    - alu_out:%h, alu_result:%h,  SrcA:%h, SrcB:%h, SrcA_crtl:%h, SrcB_crtl:%h alu_ctrl:%h,",
                     dp.ALU_out, dp.ALU_result, dp.SrcA, dp.SrcB, dp.alu_src_a, dp.alu_src_b, dp.alu_control);
+        $fflush(file); 
+        $fdisplay(file, "                Control Signals     - PCWrite: %b, AdrSrc %b, MemWrite %b, IRWrite %b, Result_Src: %b, ALU_Crtl: %b, ImmSrc: %b, RegWrite: %b", 
+        PCWrite, AdrSrc, MemWrite, IRWrite, ResultSrc, ALUControl, ImmSrc, RegWrite );
         // $fdisplay(fd, "                 alu_out:%h, alu_result:%h,  SrcA:%h, SrcB:%h, SrcA_crtl:%h, SrcB_crtl:%h alu_ctrl:%h, ")
         $fflush(file); 
     end
 
     final begin
         $fclose(file);
-        $display("I love food!");
     end
     assign LED = ~led;
     assign RGB_R = ~red;
