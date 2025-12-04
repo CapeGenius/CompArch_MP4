@@ -77,7 +77,31 @@ module top (
         .green(green),
         .blue(blue)
     );
+    integer file;
+    initial begin
+        file = $fopen("output_2.txt", "w");
 
+        if (file == 0) begin
+            $display("ERROR: Could not open file");
+            $finish;
+        end
+    end
+
+    always @(posedge clk) begin
+        $fdisplay(file, "clk: %h, instruction: %h, state: %s", clk, dp.instruction_out, ctrl.cycle_state);
+        $fflush;
+        $fdisplay(file, "                PC & Instr  - pc:%h, PC_next:%h, instruction_in: %h, instruction_out: %h, opcode: %b",
+                    dp.PC_current, dp.result, dp.instruction_in, dp.instruction_out, dp.op_code);
+        $fdisplay(file, "                ALU Information    - alu_out:%h, alu_result:%h,  SrcA:%h, SrcB:%h, SrcA_crtl:%h, SrcB_crtl:%h alu_ctrl:%h,",
+                    dp.ALU_out, dp.ALU_result, dp.SrcA, dp.SrcB, dp.alu_src_a, dp.alu_src_b, dp.alu_control);
+        // $fdisplay(fd, "                 alu_out:%h, alu_result:%h,  SrcA:%h, SrcB:%h, SrcA_crtl:%h, SrcB_crtl:%h alu_ctrl:%h, ")
+        $fflush(file); 
+    end
+
+    final begin
+        $fclose(file);
+        $display("I love food!");
+    end
     assign LED = ~led;
     assign RGB_R = ~red;
     assign RGB_G = ~green;
