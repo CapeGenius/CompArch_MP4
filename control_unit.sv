@@ -21,6 +21,8 @@ module controller (input logic clk,
     logic [1:0] ALUOp;
     logic Branch;
     logic PCUpdate;
+    
+    string cycle_state = "";
 
     localparam OP_LOAD   = 7'b0000011;
     localparam OP_STORE  = 7'b0100011;
@@ -30,6 +32,7 @@ module controller (input logic clk,
     localparam OP_BRANCH = 7'b1100011;
     localparam OP_U_TYPE = 7'b0110111;
     localparam OP_U_TYPE_2 = 7'b0010111;
+
 
     typedef enum logic [3:0] {
         FETCH    = 4'b0000,
@@ -65,11 +68,13 @@ module controller (input logic clk,
                     OP_U_TYPE, OP_I_ALU, OP_U_TYPE_2: next_state = EXECUTEI;
                     OP_JAL: next_state = JAL;
                     OP_BRANCH: next_state = BEQ; 
+                    default: next_state = FETCH;  // <---
                 endcase  
             MEMADR: 
                 case(op)
                     OP_LOAD: next_state = MEMREAD;
                     OP_STORE: next_state = MEMWRITE; 
+                    default:   next_state = FETCH;
                 endcase
             EXECUTER, EXECUTEI, JAL: next_state = ALUWB;
             MEMREAD: next_state = MEMWB;
@@ -107,8 +112,8 @@ module controller (input logic clk,
             DECODE: begin 
                 ALUSrcA = 2'b10;
                 ALUSrcB = 2'b01;
-                ALUOp   = 2'b0;
-                    // Choose immediate type based on opcode
+                ALUOp   = 2'b0;               
+                // Choose immediate type based on opcode
                 case(op)
                     7'b0000011: ImmSrc = 3'b000; // I-type (lw)
                     7'b0100011: ImmSrc = 3'b001; // S-type (sw)
@@ -141,8 +146,9 @@ module controller (input logic clk,
             MEMWRITE: begin
                 AdrSrc = 1'b1;
                 MemWrite = 1'b1;
+                ResultSrc = 2'b00;
 
-                // ALU is not used; provide safe defaults
+                // // ALU is not used; provide safe defaults
                 ALUSrcA = 2'b00;    // use PC or 0
                 ALUSrcB = 2'b00;    // use register B or 0
                 ALUOp   = 2'b00;    // ADD or dont-care
@@ -170,17 +176,18 @@ module controller (input logic clk,
             end
 
             JAL: begin
-                ALUSrcA = 2'b01;
-                ALUSrcB = 2'b10;
+                ALUSrcA = 2'b00;
+                ALUSrcB = 2'b01;
                 ALUOp   = 2'b00;
-                ResultSrc = 2'b00;
+                ResultSrc = 2'b10;
                 PCUpdate = 1'b1;
                 ImmSrc = 3'b100; 
+                Jump = 1'b1;
             end
             
             BEQ: begin
                 ALUSrcA = 2'b10;
-                ALUSrcB = 2'b00;
+                ALUSrcB = 2'b01;
                 ALUOp = 2'b01;
                 ResultSrc = 2'b00;
                 Branch = 1'b1;
@@ -191,6 +198,24 @@ module controller (input logic clk,
                 // All defaults already set above
             end
         endcase
+    end
+    //string for state name
+    always_comb begin
+        cycle_state = "";
+        case(current_state)
+            FETCH:      cycle_state = "FETCH";  
+            DECODE:     cycle_state = "DECODE";
+            MEMADR:     cycle_state = "MEMADR";
+            MEMREAD:    cycle_state = "MEMREAD";
+            MEMWB:      cycle_state = "MEMWB";
+            MEMWRITE:   cycle_state = "MEMWRITE";
+            EXECUTER:   cycle_state = "EXECUTER";
+            EXECUTEI:   cycle_state = "EXECUTEI";
+            ALUWB:      cycle_state = "ALUWB";
+            BEQ:        cycle_state = "BEQ";
+            JAL:        cycle_state = "JAL";
+        endcase
+        
     end
 
     aludec alu_decoder(op[5], funct3, funct7b5, ALUOp, ALUControl);
