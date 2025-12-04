@@ -14,7 +14,10 @@ module register #(
     logic [31:0] regs [0:31];
 
     initial begin
-        regs[0] = 32'd0; //hardwired 0
+        integer i;
+        for (i = 0; i < 32; i = i + 1) begin
+            regs[i] = 32'd0;   // initialize all regs to 0
+        end
     end
 
     always_ff @(posedge clk) begin
