@@ -25,7 +25,7 @@ module simple_lw_tb;
         repeat (3) @(posedge clk);
         reset = 0;
         
-        #900000
+        #20000
         $finish;
     end
 
