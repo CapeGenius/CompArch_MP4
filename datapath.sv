@@ -61,6 +61,22 @@ module datapath (
     assign funct3 = instruction_out[14:12];
     assign funct7 = instruction_out[31:25];
 
+    integer fd;
+
+    initial begin
+        fd = $fopen("instruction_output.txt", "w");
+
+        if (fd == 0) begin
+            $display("ERROR: Could not open file");
+            $finish;
+        end        
+    end
+
+    always @(posedge clk) begin 
+        $fdisplay(fd, "instr:%h", instruction_out,", pc:%h", PC_current, ", pc_write:%h", PC_write, ", result:%h", result); 
+        $fflush(fd); 
+    end
+
     //declaring all modules
     //program count register
     flop_enable #(.WIDTH(32), .RESET_VALUE(32'h1000)) 
@@ -83,8 +99,8 @@ module datapath (
 
     // data memory module   
     data_mem #(
-        .DMEM_INIT_FILE_PREFIX   ("rv32i_test"), 
-        .CLK_FREQ   (12000000)) 
+        .DMEM_INIT_FILE_PREFIX   ("instruction/rv32i_test"), 
+        .CLK_FREQ   (12000000))
     data_memory (
         .clk            (clk),
         .dmem_wren      (mem_write),
@@ -101,7 +117,7 @@ module datapath (
 
     // instruction memory module
     instruction_mem #(
-        .IMEM_INIT_FILE_PREFIX  ("rv32i_test")
+        .IMEM_INIT_FILE_PREFIX  ("instruction/rv32i_test")
     )
     instruction_memory (
         .clk            (clk),
@@ -150,7 +166,7 @@ module datapath (
     );
 
     extend extend_immediate(
-        .instr  (immediate),
+        .instr  (instruction_out[31:7]),
         .immsrc (imm_src),
         .immext (immed_extend)
     );
@@ -207,4 +223,9 @@ module datapath (
         .s      (result_src),
         .y      (result)
     );
+
+    final begin
+        $fclose(fd);
+        $display("hello world!");
+    end
 endmodule
