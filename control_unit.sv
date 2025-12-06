@@ -6,7 +6,8 @@ module controller (input logic clk,
                    input logic [2:0] funct3,
                    input logic funct7b5,
                    input logic Zero,
-                   output logic [1:0] ResultSrc,
+                   input logic ALUResultLSB,  // LSB of ALU result
+                   output logic [2:0] ResultSrc,
                    output logic MemWrite,
                    output logic PCSrc,
                    output logic [1:0] ALUSrcA, ALUSrcB,
@@ -108,12 +109,15 @@ module controller (input logic clk,
                 ALUSrcA = 2'b00;  
                 ALUSrcB = 2'b10; 
                 ALUOp = 2'b00;  
-                ResultSrc = 2'b10; 
+                ResultSrc = 3'b010;
                 PCUpdate = 1'b1; 
             end
 
             DECODE: begin 
-                ALUSrcA = 2'b10;
+                if (op == OP_JAL || op == OP_BRANCH)
+                    ALUSrcA = 2'b01;  // old_PC
+                else
+                    ALUSrcA = 2'b10;  // stored_read_data_1 (for JALR)
                 ALUSrcB = 2'b01;
                 ALUOp   = 2'b0;               
                 // Choose immediate type based on opcode
@@ -132,24 +136,25 @@ module controller (input logic clk,
                 ALUSrcA = 2'b10;  
                 ALUSrcB = 2'b01; 
                 ALUOp = 2'b00;  
+                ResultSrc = 3'b000;
                 if (op == 7'b0000011) ImmSrc = 3'b000; 
                 else ImmSrc = 3'b001; 
             end
             
             MEMREAD: begin
                 AdrSrc = 1'b1;   
-                ResultSrc = 2'b00;
+                ResultSrc = 3'b000;
             end
             
             MEMWB: begin
                 RegWrite = 1'b1;   
-                ResultSrc = 2'b01; 
+                ResultSrc = 3'b001;
             end
 
             MEMWRITE: begin
                 AdrSrc = 1'b1;
                 MemWrite = 1'b1;
-                ResultSrc = 2'b00;
+                ResultSrc = 3'b000;
 
                 // // ALU is not used; provide safe defaults
                 ALUSrcA = 2'b00;    // use PC or 0
@@ -162,11 +167,14 @@ module controller (input logic clk,
 
             ALUWB: begin
                 if (op == OP_U_TYPE) begin // LUI
-                    ResultSrc = 2'b11;
+                    ResultSrc = 3'b011;
                     ImmSrc = 3'b011;
                 end
+                else if (op == OP_JAL || op == OP_I_JALR) begin
+                    ResultSrc = 3'b100;  // return_address (old_PC+4)
+                end
                 else begin
-                    ResultSrc = 2'b00;
+                    ResultSrc = 3'b000;
                 end
                 RegWrite = 1'b1;
             end
@@ -181,11 +189,11 @@ module controller (input logic clk,
                 case (op)
                     //LUI
                     OP_U_TYPE: begin
-                        ALUSrcA = 2'b00;
+                        ALUSrcA = 2'b10;
                         ALUSrcB = 2'b01;
                         ALUOp   = 2'b00;
                         ImmSrc = 3'b011;
-                        ResultSrc = 2'b11;
+                        ResultSrc = 3'b011;
                     end 
 
                     //AUIPC
@@ -201,7 +209,11 @@ module controller (input logic clk,
                         ALUSrcA = 2'b10;
                         ALUSrcB = 2'b01;
                         ALUOp   = 2'b10;
-                        ImmSrc = 3'b000;
+                        // Use special immediate format for shift instructions
+                        if (funct3 == 3'b001 || funct3 == 3'b101)
+                            ImmSrc = 3'b101;  // Shift immediate (5-bit)
+                        else
+                            ImmSrc = 3'b000;  // Regular I-type (12-bit)
                     end
                 endcase
             end
@@ -210,7 +222,7 @@ module controller (input logic clk,
                 ALUSrcA = 2'b01;
                 ALUSrcB = 2'b01;
                 ALUOp   = 2'b00;
-                ResultSrc = 2'b10;
+                ResultSrc = 3'b000;
                 PCUpdate = 1'b1;
                 ImmSrc = 3'b100; 
                 Jump = 1'b1;
@@ -218,11 +230,12 @@ module controller (input logic clk,
             
             BEQ: begin
                 ALUSrcA = 2'b10;
-                ALUSrcB = 2'b01;
-                ALUOp = 2'b01;
-                ResultSrc = 2'b00;
+                ALUSrcB = 2'b00;
+                ResultSrc = 3'b000;
                 Branch = 1'b1;
                 ImmSrc = 3'b010;
+                // Signal branch comparisons to ALU decoder
+                ALUOp = 2'b11;
             end
             
             default: begin
@@ -252,6 +265,23 @@ module controller (input logic clk,
 
     aludec alu_decoder(op[5], funct3, funct7b5, ALUOp, ALUControl);
 
-    assign PCSrc = Branch & Zero | Jump;
-    assign PCWrite = PCUpdate | (Branch & Zero) | Jump;
+    logic BranchTaken;
+    always_comb begin
+        if (Branch) begin
+            case (funct3)
+                3'b000: BranchTaken = Zero;            // BEQ
+                3'b001: BranchTaken = ~Zero;           // BNE
+                3'b100: BranchTaken = ALUResultLSB;    // BLT
+                3'b101: BranchTaken = ~ALUResultLSB;   // BGE
+                3'b110: BranchTaken = ALUResultLSB;    // BLTU
+                3'b111: BranchTaken = ~ALUResultLSB;   // BGEU
+                default: BranchTaken = 0;
+            endcase
+        end else begin
+            BranchTaken = 0;
+        end
+    end
+
+    assign PCSrc = BranchTaken | Jump;
+    assign PCWrite = PCUpdate | BranchTaken | Jump;
 endmodule

@@ -11,16 +11,16 @@
     auipc x10, 0x12345      # pc = 0x28, x10 = 0x12345028
     slt x11, x3, x4         # pc = 0x2C, x11 = 0x00000001
     sltu x12, x3, x4        # pc = 0x30, x12 = 0x00000000
-    jal x13, 0x28           # pc = 0x34, x13 = 0x00000038
+    jal x13, 0x4            # pc = 0x34, x13 = 0x00000038
     addi x15, x0, 10        # pc = 0x38, x15 = 0x0000000A
     beq x15, x0, 12         # pc = 0x3C
     addi x15, x15, -1       # pc = 0x40
     jal x16, -8             # pc = 0x44, x16 = 0x00000048
     bltu x3, x4, 8          # pc = 0x48
-    blt x3, x4, 20          # pc = 0x4C
-                            # pc = 0x50
-                            # pc = 0x54
-                            # pc = 0x58
+    blt x4, x3, 8           # pc = 0x4C
+    nop                     # pc = 0x50
+    nop                     # pc = 0x54
+    nop                     # pc = 0x58
     jalr x14, 0(x13)        # pc = 0x5C, x14 = 0x00000060
     addi x17, x0, 0xC0      # pc = 0x60, x17 = 0x000000C0
     sb x17, -4(x0)          # pc = 0x64

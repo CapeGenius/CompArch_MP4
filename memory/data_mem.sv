@@ -64,7 +64,7 @@ module data_mem #(
     logic is_micros;
     logic is_dmem;
 
-    logic [31:0] dmem_data_value = 32'd0;
+    logic [31:0] dmem_data_value;
     logic [31:0] dmem_dout;
 
     logic [15:0] dmem_dout10;
@@ -149,18 +149,18 @@ module data_mem #(
         dmem_unsigned <= funct3[2];
     end
 
-    always_ff @(posedge clk) begin
+    always_comb begin
         if (is_leds) begin
-            dmem_data_value <= leds;
+            dmem_data_value = leds;
         end
         else if (is_millis) begin
-            dmem_data_value <= millis;
+            dmem_data_value = millis;
         end
         else if (is_micros) begin
-            dmem_data_value <= micros;
+            dmem_data_value = micros;
         end
         else begin
-            dmem_data_value <= 32'd0;
+            dmem_data_value = 32'd0;
         end
     end
 

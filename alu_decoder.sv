@@ -27,6 +27,15 @@ module aludec (input logic opb5,
                     default: ALUControl = 4'b0000;
                 endcase
             end
+            2'b11: begin
+                // Branch comparisons
+                case (funct3)
+                    3'b000, 3'b001: ALUControl = 4'b0001; // BEQ, BNE
+                    3'b100, 3'b101: ALUControl = 4'b0101; // BLT, BGE
+                    3'b110, 3'b111: ALUControl = 4'b0110; // BLTU, BGEU
+                    default: ALUControl = 4'b0001;
+                endcase
+            end
             default: ALUControl = 4'b0000;
         endcase
     end

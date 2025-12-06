@@ -7,19 +7,21 @@
 `include "flop.sv"
 `include "mux2.sv"
 `include "mux3.sv"
-`include "mux4.sv"
+`include "mux5.sv"
 
 module datapath (
                 input logic clk,
                 input logic reset,
                 input logic adr_src, mem_write, IR_write, reg_write, PC_write,
-                input logic [1:0] result_src, alu_src_a, alu_src_b,
+                input logic [2:0] result_src,
+                input logic [1:0] alu_src_a, alu_src_b,
                 input logic [2:0] imm_src,
                 input logic [3:0] alu_control,
                 output logic [6:0] op_code,
                 output logic [2:0] funct3,
                 output logic [6:0] funct7, 
-                output logic Zero, 
+                output logic Zero,
+                output logic ALUResultLSB,  // LSB of ALU result for branch comparisons
                 output logic led, red, green, blue);
     // create reset
     logic gen_reset;
@@ -50,6 +52,14 @@ module datapath (
 
     //declare logic for ALUs
     logic [31:0] SrcA, SrcB, ALU_result, ALU_out, result;
+    logic [31:0] PC_plus_4;
+
+    // Compute PC+4 using PC_current
+    assign PC_plus_4 = PC_current + 4;
+    
+    // Compute return address for JAL/JALR using old_PC
+    logic [31:0] return_address;
+    assign return_address = old_PC + 4;
 
     //assign rs1, rs2, rd, and extend
     assign rs1 = instruction_out[19:15];
@@ -211,6 +221,9 @@ module datapath (
         .Zero           (Zero)
     );
 
+    // Extract LSB for branch comparisons
+    assign ALUResultLSB = ALU_result[0];
+
     flop alu_flop (
         .clk            (clk),
         .reset          (gen_reset),
@@ -218,11 +231,12 @@ module datapath (
         .stored_value   (ALU_out)
     );
 
-    mux4 mux_result (
+    mux5 mux_result (
         .d0     (ALU_out),
         .d1     (dmem_data),
-        .d2     (ALU_result),
+        .d2     (PC_plus_4),
         .d3     (immed_extend),
+        .d4     (return_address),
         .s      (result_src),
         .y      (result)
     );

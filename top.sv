@@ -11,7 +11,7 @@ module top (
 );
 
     // Control signals between controller and datapath
-    logic [1:0] ResultSrc;
+    logic [2:0] ResultSrc;
     logic MemWrite;
     logic PCSrc;
     logic [1:0] ALUSrcA, ALUSrcB;
@@ -40,6 +40,7 @@ module top (
         .funct3(funct3),
         .funct7b5(funct7[5]),
         .Zero(Zero),
+        .ALUResultLSB(ALUResultLSB),
         .ResultSrc(ResultSrc),
         .MemWrite(MemWrite),
         .PCSrc(PCSrc),
@@ -72,6 +73,7 @@ module top (
         .funct3(funct3),
         .funct7(funct7),
         .Zero(Zero),
+        .ALUResultLSB(ALUResultLSB),
         .led(led),
         .red(red),
         .green(green),

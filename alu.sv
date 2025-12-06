@@ -25,9 +25,9 @@ module alu (
             XOR: ALU_result = (SrcA ^ SrcB);
             SET_LESS_THAN: ALU_result = ($signed(SrcA) < $signed(SrcB)) ? 1 : 0;
             SET_LESS_THAN_UNSIGNED: ALU_result = (SrcA < SrcB) ? 1 : 0;
-            SHIFT_LEFT_LOGICAL: ALU_result = SrcA << SrcB;
-            SHIFT_RIGHT_LOGICAL: ALU_result = SrcA >> SrcB;
-            SHIFT_RIGHT_ARITHMETIC: ALU_result = SrcA >>> SrcB;
+            SHIFT_LEFT_LOGICAL: ALU_result = SrcA << SrcB[4:0];
+            SHIFT_RIGHT_LOGICAL: ALU_result = SrcA >> SrcB[4:0];
+            SHIFT_RIGHT_ARITHMETIC: ALU_result = $signed(SrcA) >>> SrcB[4:0];
             default: ALU_result = 32'b0;
         endcase
     end
