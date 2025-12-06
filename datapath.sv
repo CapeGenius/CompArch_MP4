@@ -7,6 +7,7 @@
 `include "flop.sv"
 `include "mux2.sv"
 `include "mux3.sv"
+`include "mux4.sv"
 
 module datapath (
                 input logic clk,
@@ -217,10 +218,11 @@ module datapath (
         .stored_value   (ALU_out)
     );
 
-    mux3 mux_result (
+    mux4 mux_result (
         .d0     (ALU_out),
         .d1     (dmem_data),
         .d2     (ALU_result),
+        .d3     (immed_extend),
         .s      (result_src),
         .y      (result)
     );

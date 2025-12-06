@@ -161,7 +161,13 @@ module controller (input logic clk,
             end
 
             ALUWB: begin
-                ResultSrc = 2'b00;
+                if (op == OP_U_TYPE) begin // LUI
+                    ResultSrc = 2'b11;
+                    ImmSrc = 3'b011;
+                end
+                else begin
+                    ResultSrc = 2'b00;
+                end
                 RegWrite = 1'b1;
             end
 
@@ -172,10 +178,32 @@ module controller (input logic clk,
             end
 
             EXECUTEI: begin
-                ALUSrcA = 2'b10;
-                ALUSrcB = 2'b01;
-                ALUOp   = 2'b10;
-                ImmSrc = 3'b000; 
+                case (op)
+                    //LUI
+                    OP_U_TYPE: begin
+                        ALUSrcA = 2'b00;
+                        ALUSrcB = 2'b01;
+                        ALUOp   = 2'b00;
+                        ImmSrc = 3'b011;
+                        ResultSrc = 2'b11;
+                    end 
+
+                    //AUIPC
+                    OP_U_TYPE_2: begin
+                        ALUSrcA = 2'b01;
+                        ALUSrcB = 2'b01;
+                        ALUOp   = 2'b00;
+                        ImmSrc = 3'b011;
+                    end
+
+                    // I-type ALU
+                    default: begin
+                        ALUSrcA = 2'b10;
+                        ALUSrcB = 2'b01;
+                        ALUOp   = 2'b10;
+                        ImmSrc = 3'b000;
+                    end
+                endcase
             end
 
             JAL: begin
