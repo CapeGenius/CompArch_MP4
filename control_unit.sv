@@ -7,7 +7,7 @@ module controller (input logic clk,
                    input logic funct7b5,
                    input logic Zero,
                    input logic ALUResultLSB,  // LSB of ALU result
-                   output logic [2:0] ResultSrc,
+                   output logic [1:0] ResultSrc,
                    output logic MemWrite,
                    output logic PCSrc,
                    output logic [1:0] ALUSrcA, ALUSrcB,
@@ -32,9 +32,8 @@ module controller (input logic clk,
     localparam OP_I_JALR = 7'b1100111;
     localparam OP_JAL    = 7'b1101111;
     localparam OP_BRANCH = 7'b1100011;
-    localparam OP_U_TYPE = 7'b0110111;
-    localparam OP_U_TYPE_2 = 7'b0010111;
-
+    localparam OP_LUI = 7'b0110111;
+    localparam OP_AUIPC = 7'b0010111;
 
     typedef enum logic [3:0] {
         FETCH    = 4'b0000,
@@ -48,6 +47,7 @@ module controller (input logic clk,
         ALUWB    = 4'b1000,
         BEQ      = 4'b1001,
         JAL      = 4'b1010,
+        EXECUTEU = 4'b1011,
         BUFFER_MEM_WRITE = 4'b1111
     } statetype;
 
@@ -68,10 +68,11 @@ module controller (input logic clk,
                 case(op)
                     OP_LOAD, OP_STORE: next_state = MEMADR;
                     OP_R_TYPE: next_state = EXECUTER;
-                    OP_U_TYPE, OP_I_ALU, OP_I_JALR, OP_U_TYPE_2: next_state = EXECUTEI;
+                    OP_LUI, OP_AUIPC: next_state = EXECUTEU;
+                    OP_I_ALU, OP_I_JALR: next_state = EXECUTEI;
                     OP_JAL: next_state = JAL;
                     OP_BRANCH: next_state = BEQ; 
-                    default: next_state = FETCH;  // <---
+                    default: next_state = FETCH;
                 endcase  
             MEMADR: 
                 case(op)
@@ -79,10 +80,11 @@ module controller (input logic clk,
                     OP_STORE: next_state = MEMWRITE; 
                     default:   next_state = FETCH;
                 endcase
-            EXECUTER, EXECUTEI, JAL: next_state = ALUWB;
+            EXECUTER, EXECUTEI, EXECUTEU, JAL: next_state = ALUWB;
             MEMREAD: next_state = MEMWB;
             MEMWRITE: next_state = BUFFER_MEM_WRITE;
             MEMWB, BUFFER_MEM_WRITE, ALUWB, BEQ: next_state = FETCH;
+            default: next_state = FETCH;
         endcase
     end
 
@@ -109,7 +111,7 @@ module controller (input logic clk,
                 ALUSrcA = 2'b00;  
                 ALUSrcB = 2'b10; 
                 ALUOp = 2'b00;  
-                ResultSrc = 3'b010;
+                ResultSrc = 2'b10;
                 PCUpdate = 1'b1; 
             end
 
@@ -136,25 +138,25 @@ module controller (input logic clk,
                 ALUSrcA = 2'b10;  
                 ALUSrcB = 2'b01; 
                 ALUOp = 2'b00;  
-                ResultSrc = 3'b000;
+                ResultSrc = 2'b00;
                 if (op == 7'b0000011) ImmSrc = 3'b000; 
                 else ImmSrc = 3'b001; 
             end
             
             MEMREAD: begin
                 AdrSrc = 1'b1;   
-                ResultSrc = 3'b000;
+                ResultSrc = 2'b00;
             end
             
             MEMWB: begin
                 RegWrite = 1'b1;   
-                ResultSrc = 3'b001;
+                ResultSrc = 2'b01;
             end
 
             MEMWRITE: begin
                 AdrSrc = 1'b1;
                 MemWrite = 1'b1;
-                ResultSrc = 3'b000;
+                ResultSrc = 2'b00;
 
                 // // ALU is not used; provide safe defaults
                 ALUSrcA = 2'b00;    // use PC or 0
@@ -166,15 +168,11 @@ module controller (input logic clk,
             end
 
             ALUWB: begin
-                if (op == OP_U_TYPE) begin // LUI
-                    ResultSrc = 3'b011;
-                    ImmSrc = 3'b011;
-                end
-                else if (op == OP_JAL || op == OP_I_JALR) begin
-                    ResultSrc = 3'b100;  // return_address (old_PC+4)
+                if (op == OP_JAL || op == OP_I_JALR) begin
+                    ResultSrc = 2'b11;  // return_address (old_PC+4)
                 end
                 else begin
-                    ResultSrc = 3'b000;
+                    ResultSrc = 2'b00;
                 end
                 RegWrite = 1'b1;
             end
@@ -186,43 +184,35 @@ module controller (input logic clk,
             end
 
             EXECUTEI: begin
-                case (op)
-                    //LUI
-                    OP_U_TYPE: begin
-                        ALUSrcA = 2'b10;
-                        ALUSrcB = 2'b01;
-                        ALUOp   = 2'b00;
-                        ImmSrc = 3'b011;
-                        ResultSrc = 3'b011;
-                    end 
+                ALUSrcA = 2'b10;
+                ALUSrcB = 2'b01;
+                ALUOp   = 2'b10;
+                if (funct3 == 3'b001 || funct3 == 3'b101)
+                    ImmSrc = 3'b101;  // Shift immediate
+                else
+                    ImmSrc = 3'b000;  // Regular I-type
+            end
 
-                    //AUIPC
-                    OP_U_TYPE_2: begin
-                        ALUSrcA = 2'b01;
-                        ALUSrcB = 2'b01;
-                        ALUOp   = 2'b00;
-                        ImmSrc = 3'b011;
-                    end
-
-                    // I-type ALU
-                    default: begin
-                        ALUSrcA = 2'b10;
-                        ALUSrcB = 2'b01;
-                        ALUOp   = 2'b10;
-                        // Use special immediate format for shift instructions
-                        if (funct3 == 3'b001 || funct3 == 3'b101)
-                            ImmSrc = 3'b101;  // Shift immediate (5-bit)
-                        else
-                            ImmSrc = 3'b000;  // Regular I-type (12-bit)
-                    end
-                endcase
+            EXECUTEU: begin
+                if (op == OP_LUI) begin
+                    ALUSrcA = 2'b11;
+                    ALUSrcB = 2'b01;
+                    ALUOp   = 2'b00;
+                    ImmSrc = 3'b011;
+                end
+                else if (op == OP_AUIPC) begin
+                    ALUSrcA = 2'b01;
+                    ALUSrcB = 2'b01;
+                    ALUOp   = 2'b00;
+                    ImmSrc = 3'b011;
+                end
             end
 
             JAL: begin
                 ALUSrcA = 2'b01;
                 ALUSrcB = 2'b01;
                 ALUOp   = 2'b00;
-                ResultSrc = 3'b000;
+                ResultSrc = 2'b00;
                 PCUpdate = 1'b1;
                 ImmSrc = 3'b100; 
                 Jump = 1'b1;
@@ -231,7 +221,7 @@ module controller (input logic clk,
             BEQ: begin
                 ALUSrcA = 2'b10;
                 ALUSrcB = 2'b00;
-                ResultSrc = 3'b000;
+                ResultSrc = 2'b00;
                 Branch = 1'b1;
                 ImmSrc = 3'b010;
                 // Signal branch comparisons to ALU decoder
@@ -242,25 +232,6 @@ module controller (input logic clk,
                 // All defaults already set above
             end
         endcase
-    end
-    //string for state name
-    always_comb begin
-        cycle_state = "";
-        case(current_state)
-            FETCH:      cycle_state = "FETCH";  
-            DECODE:     cycle_state = "DECODE";
-            MEMADR:     cycle_state = "MEMADR";
-            MEMREAD:    cycle_state = "MEMREAD";
-            MEMWB:      cycle_state = "MEMWB";
-            MEMWRITE:   cycle_state = "MEMWRITE";
-            BUFFER_MEM_WRITE: cycle_state = "BUFFER_MEM_WRITE";
-            EXECUTER:   cycle_state = "EXECUTER";
-            EXECUTEI:   cycle_state = "EXECUTEI";
-            ALUWB:      cycle_state = "ALUWB";
-            BEQ:        cycle_state = "BEQ";
-            JAL:        cycle_state = "JAL";
-        endcase
-        
     end
 
     aludec alu_decoder(op[5], funct3, funct7b5, ALUOp, ALUControl);

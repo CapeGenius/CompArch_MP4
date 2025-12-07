@@ -14,7 +14,7 @@ module extend(input logic [31:7] instr,
             3'b011: immext = {instr[31:12], 12'b0};
             // J-type (Jump)
             3'b100: immext = {{11{instr[31]}}, instr[31], instr[19:12], instr[20], instr[30:21], 1'b0};
-            // Shift immediate (SLLI, SRLI, SRAI) - only 5-bit shift amount
+            // Shift immediate (SLLI, SRLI, SRAI)
             3'b101: immext = {27'b0, instr[24:20]};
             // Default
             default: immext = 32'bx;

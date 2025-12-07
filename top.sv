@@ -11,7 +11,7 @@ module top (
 );
 
     // Control signals between controller and datapath
-    logic [2:0] ResultSrc;
+    logic [1:0] ResultSrc;
     logic MemWrite;
     logic PCSrc;
     logic [1:0] ALUSrcA, ALUSrcB;
@@ -22,6 +22,7 @@ module top (
     logic [3:0] ALUControl;
     logic IRWrite;
     logic PCWrite;
+    logic ALUResultLSB;
     
     // Status signals from datapath to controller
     logic [6:0] op;
@@ -80,33 +81,7 @@ module top (
         .blue(blue)
     );
     integer file;
-    initial begin
-        file = $fopen("output_2.txt", "w");
 
-        if (file == 0) begin
-            $display("ERROR: Could not open file");
-            $finish;
-        end
-    end
-
-    always @(posedge clk) begin
-        $fdisplay(file, "instruction: %h, state: %s", dp.instruction_out, ctrl.cycle_state);
-        $fflush(file); 
-        $fdisplay(file, "                PC & Instr         - pc:%h, PC_next:%h, instruction_in: %h, instruction_out: %h, opcode: %b",
-                    dp.PC_current, dp.result, dp.instruction_in, dp.instruction_out, dp.op_code);
-        $fflush(file); 
-        $fdisplay(file, "                ALU Information    - alu_out:%h, alu_result:%h,  SrcA:%h, SrcB:%h, SrcA_crtl:%h, SrcB_crtl:%h alu_ctrl:%h,",
-                    dp.ALU_out, dp.ALU_result, dp.SrcA, dp.SrcB, dp.alu_src_a, dp.alu_src_b, dp.alu_control);
-        $fflush(file); 
-        $fdisplay(file, "                Control Signals     - PCWrite: %b, AdrSrc %b, MemWrite %b, IRWrite %b, Result_Src: %b, ALU_Crtl: %b, ImmSrc: %b, RegWrite: %b", 
-        PCWrite, AdrSrc, MemWrite, IRWrite, ResultSrc, ALUControl, ImmSrc, RegWrite );
-        // $fdisplay(fd, "                 alu_out:%h, alu_result:%h,  SrcA:%h, SrcB:%h, SrcA_crtl:%h, SrcB_crtl:%h alu_ctrl:%h, ")
-        $fflush(file); 
-    end
-
-    final begin
-        $fclose(file);
-    end
     assign LED = ~led;
     assign RGB_R = ~red;
     assign RGB_G = ~green;

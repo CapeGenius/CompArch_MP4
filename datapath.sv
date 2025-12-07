@@ -7,13 +7,13 @@
 `include "flop.sv"
 `include "mux2.sv"
 `include "mux3.sv"
-`include "mux5.sv"
+`include "mux4.sv"
 
 module datapath (
                 input logic clk,
                 input logic reset,
                 input logic adr_src, mem_write, IR_write, reg_write, PC_write,
-                input logic [2:0] result_src,
+                input logic [1:0] result_src,
                 input logic [1:0] alu_src_a, alu_src_b,
                 input logic [2:0] imm_src,
                 input logic [3:0] alu_control,
@@ -73,21 +73,6 @@ module datapath (
     assign funct7 = instruction_out[31:25];
 
     integer fd;
-
-    initial begin
-        fd = $fopen("instruction_output.txt", "w");
-
-        if (fd == 0) begin
-            $display("ERROR: Could not open file");
-            $finish;
-        end        
-    end
-
-    always @(posedge clk) begin 
-        $fdisplay(fd, "clk:%0d, instr:%h, incoming_address: %h, selected_address: %h, IR_write: %h, opcode: %h, pc:%h, alu_out:%h, alu_result:%h, PC_next:%h, SrcA:%h, SrcB:%h, SrcA_crtl:%h, SrcB_crtl:%h alu_ctrl:%h, reg_write:%0d, pc_write:%0d,",
-                    clk, instruction_out, instruction_in, mem_address, IR_write, op_code, PC_current, ALU_out, ALU_result, result, SrcA, SrcB, alu_src_a, alu_src_b, alu_control, reg_write, PC_write); 
-        $fflush(fd); 
-    end
 
     //declaring all modules
     //program count register
@@ -197,10 +182,11 @@ module datapath (
         .stored_value   (stored_read_data_2)
     );
 
-    mux3 mux_src_a (
+    mux4 mux_src_a (
         .d0     (PC_current), 
         .d1     (old_PC), 
         .d2     (stored_read_data_1), 
+        .d3     (0), 
         .s      (alu_src_a),
         .y      (SrcA)
     );
@@ -231,18 +217,12 @@ module datapath (
         .stored_value   (ALU_out)
     );
 
-    mux5 mux_result (
+    mux4 mux_result (
         .d0     (ALU_out),
         .d1     (dmem_data),
         .d2     (PC_plus_4),
-        .d3     (immed_extend),
-        .d4     (return_address),
+        .d3     (return_address),
         .s      (result_src),
         .y      (result)
     );
-
-    final begin
-        $fclose(fd);
-        $display("hello world!");
-    end
 endmodule

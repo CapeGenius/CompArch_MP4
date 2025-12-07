@@ -59,7 +59,6 @@ module mp4_tb;
         assert(u0.dp.main_register.regs[16] == 32'h00001048) else $error("x16 failed: expected 0x00001048, got 0x%h", u0.dp.main_register.regs[16]);
         assert(u0.dp.main_register.regs[17] == 32'h000000C0) else $error("x17 failed: expected 0x000000C0, got 0x%h", u0.dp.main_register.regs[17]);
         assert(u0.dp.main_register.regs[18] == 32'hC0C0C0C0) else $error("x18 failed: expected 0xC0C0C0C0, got 0x%h", u0.dp.main_register.regs[18]);
-        // x19 is micros() which varies, so skip checking
         assert(u0.dp.main_register.regs[20] == 32'hFFFFC0C0) else $error("x20 failed: expected 0xFFFFC0C0, got 0x%h", u0.dp.main_register.regs[20]);
         assert(u0.dp.main_register.regs[21] == 32'h0000C0C0) else $error("x21 failed: expected 0x0000C0C0, got 0x%h", u0.dp.main_register.regs[21]);
         assert(u0.dp.main_register.regs[22] == 32'hFFFFFFC0) else $error("x22 failed: expected 0xFFFFFFC0, got 0x%h", u0.dp.main_register.regs[22]);
