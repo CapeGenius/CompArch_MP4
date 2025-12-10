@@ -6,7 +6,7 @@ module controller (input logic clk,
                    input logic [2:0] funct3,
                    input logic funct7b5,
                    input logic Zero,
-                   input logic ALUResultLSB,  // LSB of ALU result
+                   input logic ALUResultLSB,
                    output logic [1:0] ResultSrc,
                    output logic MemWrite,
                    output logic PCSrc,

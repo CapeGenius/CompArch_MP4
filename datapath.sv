@@ -21,7 +21,7 @@ module datapath (
                 output logic [2:0] funct3,
                 output logic [6:0] funct7, 
                 output logic Zero,
-                output logic ALUResultLSB,  // LSB of ALU result for branch comparisons
+                output logic ALUResultLSB,
                 output logic led, red, green, blue);
     // create reset
     logic gen_reset;
