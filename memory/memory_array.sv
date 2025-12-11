@@ -33,9 +33,12 @@ module memory_array #(
         if (write_enable) begin
             memory[reduced_address] <= data_in;
         end
+        else begin
+            data_out <=memory[reduced_address];
+        end
     end
     
     // Combinational read for immediate access
-    assign data_out = memory[reduced_address];
+    // assign data_out = memory[reduced_address];
 
 endmodule
