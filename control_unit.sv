@@ -23,8 +23,6 @@ module controller (input logic clk,
     logic Branch;
     logic PCUpdate;
     
-    string cycle_state = "";
-
     localparam OP_LOAD   = 7'b0000011;
     localparam OP_STORE  = 7'b0100011;
     localparam OP_R_TYPE = 7'b0110011;
