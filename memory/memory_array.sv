@@ -37,8 +37,5 @@ module memory_array #(
             data_out <=memory[reduced_address];
         end
     end
-    
-    // Combinational read for immediate access
-    // assign data_out = memory[reduced_address];
 
 endmodule
