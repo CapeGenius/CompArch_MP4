@@ -1,11 +1,10 @@
 import sys
 
-infilename = "instruction/non_jb_test.txt"
-filename_parts = infilename.split(".")
-outfilename0 = filename_parts[0] + "0." + filename_parts[1]
-outfilename1 = filename_parts[0] + "1." + filename_parts[1]
-outfilename2 = filename_parts[0] + "2." + filename_parts[1]
-outfilename3 = filename_parts[0] + "3." + filename_parts[1]
+infilename = "traffic_test_hex.txt"
+outfilename0 = "instruction/instruction_0.txt"
+outfilename1 = "instruction/instruction_1.txt"
+outfilename2 = "instruction/instruction_2.txt"
+outfilename3 = "instruction/instruction_3.txt"
 
 infile = open(infilename)
 outfile0 = open(outfilename0, "w")

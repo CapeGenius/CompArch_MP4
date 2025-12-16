@@ -32,11 +32,31 @@ module top (
     
     // LED outputs from datapath
     logic led, red, green, blue;
+    
+    // Clock divider for processor
+    logic [7:0] clk_counter;
+    logic clk_divided;
+    
+    // Divide 12 MHz by 256, ~47 kHz processor clock
+    always_ff @(posedge clk or posedge reset_internal) begin
+        if (reset_internal) begin
+            clk_counter <= 0;
+            clk_divided <= 0;
+        end else begin
+            clk_counter <= clk_counter + 1;
+            if (clk_counter == 0)
+                clk_divided <= ~clk_divided;
+        end
+    end
+    
+    // Invert reset since button is active-low
+    logic reset_internal;
+    assign reset_internal = ~reset;
 
     // Controller instance
     controller ctrl (
-        .clk(clk),
-        .reset(reset),
+        .clk(clk_divided),
+        .reset(reset_internal),
         .op(op),
         .funct3(funct3),
         .funct7b5(funct7[5]),
@@ -58,8 +78,8 @@ module top (
 
     // Datapath instance  
     datapath dp (
-        .clk(clk),
-        .reset(reset),
+        .clk(clk_divided),
+        .reset(reset_internal),
         .adr_src(AdrSrc),
         .mem_write(MemWrite),
         .IR_write(IRWrite),
