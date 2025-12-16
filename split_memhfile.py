@@ -1,6 +1,6 @@
 import sys
 
-infilename = "traffic_test_hex.txt"
+infilename = "traffic_light_hex.txt"
 outfilename0 = "instruction/instruction_0.txt"
 outfilename1 = "instruction/instruction_1.txt"
 outfilename2 = "instruction/instruction_2.txt"

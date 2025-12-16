@@ -50,12 +50,23 @@ module controller (input logic clk,
     } statetype;
 
     statetype current_state, next_state;
+    
+    logic [1:0] cycle_counter;
 
     always_ff @(posedge clk, posedge reset) begin
-        if (reset)
+        if (reset) begin
             current_state <= FETCH;
-        else
-            current_state <= next_state;
+            cycle_counter <= 2'd0;
+        end
+        else begin
+            if (cycle_counter == 2'd2) begin
+                current_state <= next_state;
+                cycle_counter <= 2'd0;
+            end
+            else begin
+                cycle_counter <= cycle_counter + 1;
+            end
+        end
     end
 
     // Next state
@@ -105,12 +116,12 @@ module controller (input logic clk,
         case (current_state)
             FETCH: begin
                 AdrSrc = 1'b0;
-                IRWrite = 1'b1; 
+                IRWrite = (cycle_counter == 2'd2); 
                 ALUSrcA = 2'b00;  
                 ALUSrcB = 2'b10; 
                 ALUOp = 2'b00;  
                 ResultSrc = 2'b10;
-                PCUpdate = 1'b1; 
+                PCUpdate = (cycle_counter == 2'd2); 
             end
 
             DECODE: begin 

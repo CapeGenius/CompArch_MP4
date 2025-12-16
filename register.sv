@@ -2,6 +2,7 @@ module register #(
     parameter CLK_FREQ = 12000000
 )(
     input logic clk,
+    input logic reset,
     input logic write_enable_flag,
     input logic[4:0] a1, // address of RS1
     input logic [4:0] a2, // address of RS2
@@ -13,18 +14,18 @@ module register #(
 
     logic [31:0] regs [0:31];
 
-    initial begin
-        integer i;
-        for (i = 0; i < 32; i = i + 1) begin
-            regs[i] = 32'd0;   // initialize all regs to 0
-        end
-    end
-
     always_ff @(posedge clk) begin
-        if (write_enable_flag && a3 > 0) begin // ensures that any register greater than zero can change
-            regs[a3] <= write_data_input; 
+        if (reset) begin
+            // Explicitly reset all registers to 0 for hardware synthesis
+            for (int i = 0; i < 32; i++) begin
+                regs[i] <= 32'd0;
+            end
+        end else begin
+            if (write_enable_flag && a3 > 0) begin
+                regs[a3] <= write_data_input;
+            end
+            regs[0] <= 32'd0;  // x0 always 0
         end
-        regs[0] <= 32'd0;
     end
 
     always_comb begin

@@ -152,8 +152,9 @@ module datapath (
 
     //main register
     register main_register(
-        .clk                (clk), 
-        .write_enable_flag  (reg_write), 
+        .clk                (clk),
+        .reset              (gen_reset),
+        .write_enable_flag  (reg_write),
         .a1                 (rs1),
         .a2                 (rs2),
         .a3                 (rd),

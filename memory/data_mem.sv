@@ -326,10 +326,10 @@ module data_mem #(
         pwm_counter <= pwm_counter + 1;
     end
 
-    assign led = ~(pwm_counter < leds[31:24]);
-    assign red = ~(pwm_counter < leds[23:16]);
-    assign green = ~(pwm_counter < leds[15:8]);
-    assign blue = ~(pwm_counter < leds[7:0]);
+    assign led = (pwm_counter < leds[31:24]);
+    assign red = (pwm_counter < leds[23:16]);
+    assign green = (pwm_counter < leds[15:8]);
+    assign blue = (pwm_counter < leds[7:0]);
 
     // Implement millis counter
     always_ff @(posedge clk) begin
@@ -353,6 +353,6 @@ module data_mem #(
         end
     end
 
-    assign reset = 1'b1;
+    assign reset = 1'b0;
 
 endmodule
