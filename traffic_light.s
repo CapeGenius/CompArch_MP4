@@ -23,7 +23,7 @@ delay_1ms:
 delay_wait:
     lw   x11, -8(x1)
     beq  x10, x11, delay_wait
-    jalr x0, 0(x1)          
+    jalr x0, 0(ra)          
 
 
 traffic_loop:
@@ -37,7 +37,7 @@ fade_in_red:
     or   x2, x2, x3
     sw   x2, 0(x1)
 
-    jal  x0, delay_1ms
+    jal  ra, delay_1ms
 
     addi x5, x5, 8
     blt  x5, x7, fade_in_red
@@ -46,8 +46,8 @@ fade_in_red:
     addi x5, x0, 255
     slli x2, x5, 16
     sw   x2, 0(x1)
-    jal  x0, delay_1ms
-    jal  x0, delay_1ms
+    jal  ra, delay_1ms
+    jal  ra, delay_1ms
 
 
 # YELLOW PHASE: fade green in
@@ -59,7 +59,7 @@ fade_to_yellow:
     or   x2, x2, x3
     sw   x2, 0(x1)
 
-    jal  x0, delay_1ms
+    jal  ra, delay_1ms
 
     addi x6, x6, 8
     blt  x6, x7, fade_to_yellow
@@ -70,8 +70,8 @@ fade_to_yellow:
     slli x3, x6, 8
     or   x2, x2, x3
     sw   x2, 0(x1)
-    jal  x0, delay_1ms
-    jal  x0, delay_1ms
+    jal  ra, delay_1ms
+    jal  ra, delay_1ms
 
 
 # GREEN PHASE: fade red out
@@ -81,7 +81,7 @@ fade_to_green:
     or   x2, x2, x3
     sw   x2, 0(x1)
 
-    jal  x0, delay_1ms
+    jal  ra, delay_1ms
 
     addi x5, x5, -8
     bge  x5, x0, fade_to_green
@@ -91,8 +91,8 @@ fade_to_green:
     addi x6, x0, 255
     slli x3, x6, 8
     sw   x3, 0(x1)
-    jal  x0, delay_1ms
-    jal  x0, delay_1ms
+    jal  ra, delay_1ms
+    jal  ra, delay_1ms
 
 
 # Fade green out to black
@@ -100,7 +100,7 @@ fade_out_green:
     slli x3, x6, 8
     sw   x3, 0(x1)
 
-    jal  x0, delay_1ms
+    jal  ra, delay_1ms
 
     addi x6, x6, -8
     bge  x6, x0, fade_out_green
