@@ -96,7 +96,7 @@ module datapath (
 
     // data memory module   
     data_mem #(
-        .DMEM_INIT_FILE_PREFIX   ("instruction/rv32i_test"), 
+        .DMEM_INIT_FILE_PREFIX   ("instruction/instruction_"), 
         .CLK_FREQ   (12000000))
     data_memory (
         .clk            (clk),
@@ -114,7 +114,7 @@ module datapath (
 
     // instruction memory module
     instruction_mem #(
-        .IMEM_INIT_FILE_PREFIX  ("instruction/rv32i_test")
+        .IMEM_INIT_FILE_PREFIX  ("instruction/instruction_")
     )
     instruction_memory (
         .clk            (clk),
