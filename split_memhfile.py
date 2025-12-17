@@ -1,6 +1,6 @@
 import sys
 
-infilename = "instruction/non_jb_test.txt"
+infilename = "instruction/instruction_.txt"
 filename_parts = infilename.split(".")
 outfilename0 = filename_parts[0] + "0." + filename_parts[1]
 outfilename1 = filename_parts[0] + "1." + filename_parts[1]
