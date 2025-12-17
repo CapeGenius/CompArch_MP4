@@ -23,8 +23,6 @@ module controller (input logic clk,
     logic Branch;
     logic PCUpdate;
     
-    string cycle_state = "";
-
     localparam OP_LOAD   = 7'b0000011;
     localparam OP_STORE  = 7'b0100011;
     localparam OP_R_TYPE = 7'b0110011;
@@ -37,6 +35,7 @@ module controller (input logic clk,
 
     typedef enum logic [3:0] {
         FETCH    = 4'b0000,
+        FETCH_BUFFER = 4'b1100,
         DECODE   = 4'b0001,
         MEMADR   = 4'b0010,
         MEMREAD  = 4'b0011,
@@ -54,16 +53,18 @@ module controller (input logic clk,
     statetype current_state, next_state;
 
     always_ff @(posedge clk, posedge reset) begin
-        if (reset)
+        if (reset) begin
             current_state <= FETCH;
-        else
+        end else begin
             current_state <= next_state;
+        end
     end
 
     // Next state
     always_comb begin
         case (current_state)
-            FETCH:  next_state = DECODE;
+            FETCH:  next_state = FETCH_BUFFER;
+            FETCH_BUFFER: next_state = DECODE;
             DECODE:
                 case(op)
                     OP_LOAD, OP_STORE: next_state = MEMADR;
@@ -107,12 +108,18 @@ module controller (input logic clk,
         case (current_state)
             FETCH: begin
                 AdrSrc = 1'b0;
-                IRWrite = 1'b1; 
+                IRWrite = 1'b0;
                 ALUSrcA = 2'b00;  
                 ALUSrcB = 2'b10; 
                 ALUOp = 2'b00;  
                 ResultSrc = 2'b10;
-                PCUpdate = 1'b1; 
+                PCUpdate = 1'b0;
+            end
+
+            FETCH_BUFFER: begin
+                // Latch instruction that just arrived from memory, then increment PC
+                IRWrite = 1'b1;
+                PCUpdate = 1'b1;
             end
 
             DECODE: begin 
@@ -149,7 +156,7 @@ module controller (input logic clk,
             end
             
             MEMWB: begin
-                RegWrite = 1'b1;   
+                RegWrite = 1'b1;
                 ResultSrc = 2'b01;
             end
 
