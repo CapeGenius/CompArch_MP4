@@ -3,7 +3,7 @@
 
 module top (
     input logic clk,
-    input logic reset,
+    input logic SW,
     output logic LED,
     output logic RGB_R,
     output logic RGB_G, 
@@ -24,6 +24,8 @@ module top (
     logic PCWrite;
     logic ALUResultLSB;
     
+    logic reset;
+    
     // Status signals from datapath to controller
     logic [6:0] op;
     logic [2:0] funct3;
@@ -32,6 +34,8 @@ module top (
     
     // LED outputs from datapath
     logic led, red, green, blue;
+
+    assign reset = ~SW;
 
     // Controller instance
     controller ctrl (

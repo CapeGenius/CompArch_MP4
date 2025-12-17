@@ -4,12 +4,12 @@
 module mp4_tb;
 
     logic clk = 0;
-    logic reset = 1;
+    logic sw = 0;
     logic LED, RGB_R, RGB_G, RGB_B;
 
     top u0 (
         .clk    (clk), 
-        .reset  (reset),
+        .SW     (sw),
         .LED    (LED), 
         .RGB_R  (RGB_R), 
         .RGB_G  (RGB_G), 
@@ -21,9 +21,9 @@ module mp4_tb;
         $dumpvars(0, mp4_tb);
         
         // Reset sequence
-        reset = 1;
+        sw = 0;
         #20;
-        reset = 0;
+        sw = 1;
         
         // Monitor key signals with more details
         $monitor("Time=%0d PC=%h Instr=%h State=%h AdrSrc=%b IRWrite=%b PCWrite=%b LED=%b", 
